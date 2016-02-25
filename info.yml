@@ -1,0 +1,43 @@
+display_name: "Local Repo Sync"
+description: "Keeps local clones of code repositories up to date"
+
+configuration:
+    local_repos:
+        type: list
+        description: Specify repositories to clone and update locally
+        allows_empty: True
+        default_value: []
+        values:
+            type: dict
+            items:
+                name:
+                    type: str
+                repo_type:
+                    type: str
+                    default_value: git
+                remote_url:
+                    type: str
+                local_url:
+                    type: str
+                branch:
+                    type: str
+                add_to_pythonpath:
+                    type: bool
+                    default_value: True
+    hook_clone:
+          type: hook
+          default_value: '{self}/git_clone.py'
+          parameters: [repo]
+    hook_update:
+        type: hook
+        default_value: '{self}/git_update.py'
+        parameters: [repo]
+
+supported_engines: ['tk-desktop', 'tk-maya', 'tk-nuke']
+
+supported_platforms: ['windows']
+
+required_context: ['project']
+
+frameworks:
+    - {'name': 'bbf-repo-utils', 'version': 'v1.x.x'}
