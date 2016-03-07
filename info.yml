@@ -33,7 +33,7 @@ configuration:
         default_value: '{self}/git_update.py'
         parameters: [repo]
 
-supported_engines: ['tk-desktop', 'tk-maya', 'tk-nuke']
+supported_engines: ['tk-desktop', 'tk-shotgun', 'tk-shell', 'tk-maya', 'tk-nuke']
 
 supported_platforms: ['windows']
 

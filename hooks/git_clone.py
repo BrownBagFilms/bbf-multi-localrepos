@@ -18,7 +18,7 @@ HookBaseClass = sgtk.get_hook_baseclass()
 class GitCloneHook(HookBaseClass):
     def execute(self, msgBox, repo):
         msgBox = msgBox()
-        msgBox.resize(640, 480)
+        msgBox.resize(512, 320)
         msgBox.show()
         msgBox.showMaximized()
         msgBox.showNormal()
