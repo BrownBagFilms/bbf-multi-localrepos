@@ -24,6 +24,9 @@ configuration:
                 add_to_pythonpath:
                     type: bool
                     default_value: True
+                as_background_process:
+                    type: bool
+                    default_value: True
     hook_clone:
           type: hook
           default_value: '{self}/git_clone.py'

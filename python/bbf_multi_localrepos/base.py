@@ -11,7 +11,7 @@ __all__ = ['update_local_repos']
 
 import os
 import sys
-
+import threading
 from PySide import QtGui
 
 import repoupdateui_ui
@@ -35,7 +35,8 @@ class RepoUpdateUi(QtGui.QMainWindow):
         QtGui.QApplication.processEvents()
 
 def update_local_repos(app):
-    for repo in app.settings['local_repos']:
+    def doit(app, repo):
+        app.log_info('Cloning {repo} repository - this might take a while!'.format(repo=repo['name']))
         clone_success = app.execute_hook('hook_clone', msgBox=RepoUpdateUi, repo=repo)
         update_success = app.execute_hook('hook_update', msgBox=RepoUpdateUi, repo=repo)
 
@@ -48,3 +49,14 @@ def update_local_repos(app):
             pythonpath.append(repo['local_url'])
             pythonpath = os.pathsep.join(pythonpath)
             os.environ['PYTHONPATH'] = pythonpath
+
+    threads = []
+    for repo in app.settings['local_repos']:
+        if repo['as_background_process']:
+            app.log_info("THEAFING")
+            t = threading.Thread(target=doit, args=(app, repo))
+            threads.append(t)
+            t.start()
+        else:
+            app.log_info("NOT THREADING")
+            doit(app, repo)

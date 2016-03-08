@@ -10,7 +10,7 @@ from __future__ import print_function
 __all__ = ['GitCloneHook']
 
 import re
-
+import os
 import sgtk
 
 HookBaseClass = sgtk.get_hook_baseclass()
@@ -25,7 +25,9 @@ class GitCloneHook(HookBaseClass):
         msgBox.raise_()
 
         self.parent.log_info('Checking local {repo} repository'.format(repo=repo['name']))
-
+        if os.path.exists(repo['local_url']):
+            self.parent.log_info('Local repo already exists at {local_url} repository'.format(local_url=repo['local_url']))
+            return True
         self.parent.log_info('Cloning {repo} repository - this might take a while!'.format(repo=repo['name']))
 
         git_clone = self.parent.git.clone_subprocess(repo['remote_url'], repo['local_url'], repo['branch'])
