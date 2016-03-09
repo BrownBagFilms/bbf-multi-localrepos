@@ -53,10 +53,8 @@ def update_local_repos(app):
     threads = []
     for repo in app.settings['local_repos']:
         if repo['as_background_process']:
-            app.log_info("THEAFING")
             t = threading.Thread(target=doit, args=(app, repo))
             threads.append(t)
             t.start()
         else:
-            app.log_info("NOT THREADING")
             doit(app, repo)
