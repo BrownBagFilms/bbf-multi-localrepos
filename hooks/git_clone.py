@@ -18,13 +18,12 @@ HookBaseClass = sgtk.get_hook_baseclass()
 class GitCloneHook(HookBaseClass):
     def execute(self, msgBox, repo):
         msgBox = msgBox()
-        msgBox.resize(512, 320)
-        msgBox.show()
-        msgBox.showMaximized()
-        msgBox.showNormal()
-        msgBox.raise_()
+        # msgBox.resize(512, 320)
+        # msgBox.show()
+        # msgBox.showMaximized()
+        # msgBox.showNormal()
+        # msgBox.raise_()
 
-        self.parent.log_info('Checking local {repo} repository'.format(repo=repo['name']))
         if os.path.exists(repo['local_url']):
             self.parent.log_info('Local repo already exists at {local_url} repository'.format(local_url=repo['local_url']))
             return True

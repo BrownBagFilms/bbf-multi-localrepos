@@ -36,19 +36,12 @@ class RepoUpdateUi(QtGui.QMainWindow):
 
 def update_local_repos(app):
     def doit(app, repo):
-        app.log_info('Cloning {repo} repository - this might take a while!'.format(repo=repo['name']))
         clone_success = app.execute_hook('hook_clone', msgBox=RepoUpdateUi, repo=repo)
         update_success = app.execute_hook('hook_update', msgBox=RepoUpdateUi, repo=repo)
 
-        if clone_success and update_success and repo['add_to_pythonpath']:
-            os.environ[repo['name']] = repo['local_url']
+        if False in [clone_success, update_success]:
+            app.log_info('Problem cloning/updating {repo} repository'.format(repo=repo['name']))
 
-            sys.path.append(repo['local_url'])
-
-            pythonpath = os.environ.get('PYTHONPATH', '').split(os.pathsep)
-            pythonpath.append(repo['local_url'])
-            pythonpath = os.pathsep.join(pythonpath)
-            os.environ['PYTHONPATH'] = pythonpath
 
     threads = []
     for repo in app.settings['local_repos']:
@@ -58,3 +51,10 @@ def update_local_repos(app):
             t.start()
         else:
             doit(app, repo)
+        if repo['add_to_pythonpath']:
+            os.environ[repo['name']] = repo['local_url']
+            sys.path.append(repo['local_url'])
+            pythonpath = os.environ.get('PYTHONPATH', '').split(os.pathsep)
+            pythonpath.append(repo['local_url'])
+            pythonpath = os.pathsep.join(pythonpath)
+            os.environ['PYTHONPATH'] = pythonpath

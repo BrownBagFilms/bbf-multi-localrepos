@@ -18,11 +18,11 @@ HookBaseClass = sgtk.get_hook_baseclass()
 class GitUpdateHook(HookBaseClass):
     def execute(self, msgBox, repo):
         msgBox = msgBox()
-        msgBox.resize(640, 480)
-        msgBox.show()
-        msgBox.showMaximized()
-        msgBox.showNormal()
-        msgBox.raise_()
+        # msgBox.resize(640, 480)
+        # msgBox.show()
+        # msgBox.showMaximized()
+        # msgBox.showNormal()
+        # msgBox.raise_()
 
         self.parent.log_info('Updating local {repo} repository'.format(repo=repo['name']))
 
