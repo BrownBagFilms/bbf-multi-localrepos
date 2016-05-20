@@ -35,22 +35,27 @@ class RepoUpdateUi(QtGui.QMainWindow):
         QtGui.QApplication.processEvents()
 
 def update_local_repos(app):
-    def doit(app, repo):
-        clone_success = app.execute_hook('hook_clone', msgBox=RepoUpdateUi, repo=repo)
+    def update(app, repo):
         update_success = app.execute_hook('hook_update', msgBox=RepoUpdateUi, repo=repo)
+        if not update_success:
+            app.log_info('Problem updating {repo} repository'.format(repo=repo['name']))
 
-        if False in [clone_success, update_success]:
-            app.log_info('Problem cloning/updating {repo} repository'.format(repo=repo['name']))
-
+    def clone(app, repo):
+        clone_success = app.execute_hook('hook_clone', msgBox=RepoUpdateUi, repo=repo)
+        if not clone_success:
+            app.log_info('Problem cloning {repo} repository'.format(repo=repo['name']))
 
     threads = []
     for repo in app.settings['local_repos']:
+        clone(app, repo)
+
         if repo['as_background_process']:
-            t = threading.Thread(target=doit, args=(app, repo))
+            t = threading.Thread(target=update, args=(app, repo))
             threads.append(t)
             t.start()
         else:
-            doit(app, repo)
+            update(app, repo)
+        
         if repo['add_to_pythonpath']:
             os.environ[repo['name']] = repo['local_url']
             sys.path.append(repo['local_url'])
