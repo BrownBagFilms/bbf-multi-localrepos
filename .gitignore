@@ -1,0 +1,17 @@
+# Python
+########
+*.pyc
+
+# Emacs
+#######
+*.#*
+*.*~
+
+# Random Useless Files
+######################
+.DStore
+Thumbs.db
+*.sln
+*.suo
+*.pyproj
+*.user
