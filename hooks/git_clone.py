@@ -29,8 +29,8 @@ class GitCloneHook(HookBaseClass):
         msgBox.showNormal()
         msgBox.raise_()
 
-        clone_message = 'Cloning {repo} repository - this might take a while (up to 30 minutes)!'.format(repo=repo['name'])
-        clone_message += '\nBut it only needs to happen once. Shotgun Desktop may be Not Responding as it clones'
+        clone_message = 'Cloning {repo} repository into {local}- this might take a while.'.format(repo=repo['name'], local=repo['local_url'])
+        clone_message += '\nBut it only needs to happen once. Shotgun Desktop may be "Not Responding" as it clones'
         msgBox.add_text(clone_message)
         self.parent.log_info(clone_message)
 
