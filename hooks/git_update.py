@@ -26,7 +26,7 @@ class GitUpdateHook(HookBaseClass):
 
         self.parent.log_info('Updating local {repo} repository'.format(repo=repo['name']))
 
-        git_pull = self.parent.git.update_subprocess(repo['local_url'])
+        git_pull = self.parent.git.update_subprocess(repo['local_url'], branch=repo['branch'])
 
         percentage_re = re.compile('(?P<percentage>\d+)%')
         for line in git_pull.stdout:
