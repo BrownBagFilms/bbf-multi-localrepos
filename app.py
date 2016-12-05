@@ -9,4 +9,4 @@ class LocalRepos(Application):
         def call_update_local_repos(app=self):
             app_module.update_local_repos(app)
 
-        self.engine.register_command("Update Code Repo", call_update_local_repos, {})
+        self.engine.register_command("update_code_repo", call_update_local_repos, {})

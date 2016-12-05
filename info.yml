@@ -44,3 +44,4 @@ required_context: ['project']
 
 frameworks:
     - {'name': 'bbf-repo-utils', 'version': 'v1.x.x'}
+    - {'name': 'tk-framework-shotgunutils', 'version': 'v4.x.x'}
