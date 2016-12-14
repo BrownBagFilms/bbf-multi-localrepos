@@ -12,11 +12,22 @@ __all__ = ['update_local_repos']
 import os
 import sys
 import threading
-from PySide import QtGui
+from PySide import QtGui, QtCore
 
 import bbf_sgtk_config.bbf_override_config as bbf_override_config
 
 import repoupdateui_ui
+
+
+class Progress(QtCore.QObject):
+
+    update_output = QtCore.Signal(str)
+    update_percentage = QtCore.Signal(float)
+    finished = QtCore.Signal()
+    reset = QtCore.Signal()
+
+    def __init__(self, parent=None):
+        super(Progress, self).__init__(parent)
 
 
 class RepoUpdateUi(QtGui.QMainWindow):
@@ -25,20 +36,25 @@ class RepoUpdateUi(QtGui.QMainWindow):
 
         self._ui = repoupdateui_ui.Ui_RepoUpdateUi()
         self._ui.setupUi(self)
+        self._ui.textEdit.setReadOnly(True)
+
+    def reset(self):
+        self._ui.textEdit.clear()
+        self._ui.progressBar.setValue(0.0)
 
     def add_text(self, msg):
         self._ui.textEdit.insertHtml('{msg}<br />\n'.format(msg=msg))
         self._ui.textEdit.ensureCursorVisible()
-        QtGui.QApplication.processEvents()
+        # QtGui.QApplication.processEvents()
 
     def set_percentage(self, percentage):
         percentage = float(percentage)
 
         self._ui.progressBar.setValue(percentage)
-        QtGui.QApplication.processEvents()
+        # QtGui.QApplication.processEvents()
 
 
-def _update(app, repo):
+def _update(app, repo, progress):
     project_id = app.context.project.get("id")
     # Get stored override config file name
     # config_file_name = app.settings_manager.retrieve("bbf_config_file_%s" % project_id, None,
@@ -58,26 +74,40 @@ def _update(app, repo):
                 repo["local_url"] = repo_config_data.get("local_url") or repo["local_url"]
                 repo["remote_url"] = repo_config_data.get("remote_url") or repo["remote_url"]
 
-    clone_success = app.execute_hook('hook_clone', msgBox=RepoUpdateUi, repo=repo)
+    clone_success = app.execute_hook('hook_clone', repo=repo, progress=progress)
     if not clone_success:
-        app.log_info('Problem cloning {repo} repository'.format(repo=repo['name']))
+        progress.update_output.emit('Problem cloning {repo} repository'.format(repo=repo['name']))
 
-    update_success = app.execute_hook('hook_update', msgBox=RepoUpdateUi, repo=repo)
+    progress.reset.emit()
+
+    update_success = app.execute_hook('hook_update', repo=repo, progress=progress)
     if not update_success:
-        app.log_info('Problem updating {repo} repository'.format(repo=repo['name']))
+        progress.update_output.emit('Problem updating {repo} repository'.format(repo=repo['name']))
+
+    progress.finished.emit()
 
 
 def update_local_repos(app):
 
+    progress = Progress()
+    if app.engine.instance_name == "tk-desktop":
+        widget = app.engine.show_dialog(app.instance_name, app, RepoUpdateUi)
+        progress.update_output.connect(widget.add_text)
+        progress.update_percentage.connect(widget.set_percentage)
+        progress.reset.connect(widget.reset)
+        progress.finished.connect(widget.close)
+
+    progress.update_output.connect(app.log_info)
+
     threads = []
     for repo in app.settings['local_repos']:
         if repo['as_background_process']:
-            t = threading.Thread(target=_update, args=(app, repo))
+            t = threading.Thread(target=_update, args=(app, repo, progress))
             threads.append(t)
             t.start()
         else:
-            _update(app, repo)
-        
+            _update(app, repo, progress)
+
         if repo['add_to_pythonpath']:
             os.environ[repo['name']] = repo['local_url']
             sys.path.append(repo['local_url'])
