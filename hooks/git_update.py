@@ -9,7 +9,10 @@ from __future__ import print_function
 
 __all__ = ['GitUpdateHook']
 
+
+import os
 import re
+import time
 
 import sgtk
 
@@ -20,6 +23,9 @@ class GitUpdateHook(HookBaseClass):
     def execute(self, repo, progress):
 
         progress.update_output.emit('Updating local {repo} repository'.format(repo=repo['name']))
+
+        local_repo = repo.get("local_url")
+        check_git_lock(local_repo)
 
         process = self.parent.git.update_subprocess(repo['local_url'], branch=repo['branch'])
 
@@ -46,3 +52,26 @@ class GitUpdateHook(HookBaseClass):
         progress.update_output.emit('{repo} up to date'.format(repo=repo['name']))
 
         return True
+
+
+def check_git_lock(local_repo_path):
+    """
+    Checks '.git' folder for 'index.lock' and delete it if exists and is longer than 24 hours old.
+
+    :param local_repo_path: str
+    """
+    cut_off_time = 86400.0  # 24 hours in seconds
+
+    if local_repo_path is not None:
+        git_lock_file = os.path.join(local_repo_path, ".git", "index.lock")
+
+        if os.path.exists(git_lock_file):
+            time_modified = os.path.getmtime(git_lock_file)
+            now = time.time()
+
+            if (now - time_modified) > cut_off_time:
+                try:
+                    os.remove(git_lock_file)
+                except IOError as e:
+                    pass
+
