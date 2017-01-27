@@ -27,7 +27,7 @@ class GitUpdateHook(HookBaseClass):
         local_repo = repo.get("local_url")
         check_git_lock(local_repo)
 
-        process = self.parent.git.update_subprocess(repo['local_url'], branch=repo['branch'])
+        process = self.parent.update_subprocess(repo['local_url'], branch=repo['branch'])
 
         if process is None:
             error_msg = "An Error has occurred trying to update %s\n" % repo['name']

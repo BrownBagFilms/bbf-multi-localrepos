@@ -29,7 +29,7 @@ class GitCloneHook(HookBaseClass):
         progress.update_output.emit(clone_message)
         # self.parent.log_info(clone_message)
 
-        process = self.parent.git.clone_subprocess(repo['remote_url'], repo['local_url'], repo['branch'])
+        process = self.parent.clone_subprocess(repo['remote_url'], repo['local_url'], repo['branch'])
 
         if process is None:
             error_msg = "An Error has occurred trying to clone %s\n" % repo['name']
@@ -44,7 +44,7 @@ class GitCloneHook(HookBaseClass):
                 if process.waitForReadyRead(60000):
                     available_output = str(process.readAllStandardOutput()).replace("\r", "")
                     for line in available_output.split("\n"):
-                        self.parent.log_info(line)
+                        # self.parent.log_info(line)
                         progress.update_output.emit(line)
                         m = percentage_re.search(line)
                         if m is not None:
