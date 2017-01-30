@@ -61,11 +61,18 @@ def _update(app, repo, progress):
     #                                                  app.settings_manager.SCOPE_PROJECT)
     config_file_name = bbf_override_config.get_config_file_name(project_id)
 
+    run_update = False
+
     # Use override data if found
     if config_file_name:
         config_data = bbf_override_config.get_available_override_config(config_file_name)
-
         if config_data:
+            config_mode = config_data.get("config_mode")
+
+            # Make sure only primary config_mode will update code repo.
+            if config_mode == "primary":
+                run_update = True
+
             repo_config_data = config_data.get("bbf_localrepos_config")
 
             if repo_config_data:
@@ -80,9 +87,12 @@ def _update(app, repo, progress):
 
     progress.reset.emit()
 
-    update_success = app.execute_hook('hook_update', repo=repo, progress=progress)
-    if not update_success:
-        progress.update_output.emit('Problem updating {repo} repository'.format(repo=repo['name']))
+    if run_update:
+        update_success = app.execute_hook('hook_update', repo=repo, progress=progress)
+        if not update_success:
+            progress.update_output.emit('Problem updating {repo} repository'.format(repo=repo['name']))
+    else:
+        progress.update_output.emit("Currently in 'dev' mode.  Skipping repo update!")
 
     progress.finished.emit()
 

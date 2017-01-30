@@ -11,6 +11,7 @@ __all__ = ['GitUpdateHook']
 
 
 import os
+import urlparse
 import re
 import time
 
@@ -63,6 +64,9 @@ def check_git_lock(local_repo_path):
     cut_off_time = 86400.0  # 24 hours in seconds
 
     if local_repo_path is not None:
+        p = urlparse.urlparse(local_repo_path)
+        local_repo_path = os.path.abspath(os.path.join(p.netloc, p.path))
+
         git_lock_file = os.path.join(local_repo_path, ".git", "index.lock")
 
         if os.path.exists(git_lock_file):
