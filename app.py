@@ -7,13 +7,15 @@ class LocalRepos(Application):
     def init_app(self):
 
         app_module = self.import_module('bbf_multi_localrepos')
-        psutil_module = self.import_module('psutil')
+        try:
+            self.psutil = self.import_module('psutil')
+        except:
+            self.psutil = None
         framework_sgutils = self.frameworks.get("tk-framework-shotgunutils")
         settings_module = framework_sgutils.import_module("settings")
         self.settings_manager = settings_module.UserSettings(self.engine)
 
         self.git = app_module.git
-        self.psutil = psutil_module
         self.git_cmds = app_module.git.base.git_cmds
 
         def call_update_local_repos(app=self):
@@ -55,13 +57,14 @@ class LocalRepos(Application):
         return call_git(process_args)
 
     def clean_process(self, process):
-        pid = process.pid()
-        p = self.psutil.Process(pid)
-        for child_proc in p.children(recursive=True):
-            if child_proc.is_running():
-                child_proc.kill()
-        if p.is_running():
-            p.kill()
+        if self.psutil:
+            pid = process.pid()
+            p = self.psutil.Process(pid)
+            for child_proc in p.children(recursive=True):
+                if child_proc.is_running():
+                    child_proc.kill()
+            if p.is_running():
+                p.kill()
 
-        process.close()
+            process.close()
 
