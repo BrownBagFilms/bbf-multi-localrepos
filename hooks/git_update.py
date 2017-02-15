@@ -37,9 +37,13 @@ class GitUpdateHook(HookBaseClass):
             return False
 
         percentage_re = re.compile('(?P<percentage>\d+)%')
-
+        t = 0
         if process.waitForStarted(60000):
             while process.state() == process.Running:
+                if t >= 10:
+                    self.parent.clean_process(process)
+                    break
+                t += 1
                 if process.waitForReadyRead(60000):
                     available_output = str(process.readAllStandardOutput()).replace("\r", "")
                     for line in available_output.split("\n"):
@@ -49,7 +53,6 @@ class GitUpdateHook(HookBaseClass):
                             progress.update_percentage.emit(float(m.group("percentage")))
 
         process.close()
-
         progress.update_output.emit('{repo} up to date'.format(repo=repo['name']))
 
         return True
