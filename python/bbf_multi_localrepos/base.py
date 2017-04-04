@@ -54,6 +54,28 @@ class RepoUpdateUi(QtGui.QMainWindow):
         # QtGui.QApplication.processEvents()
 
 
+def clean_repo_root_path(repo_root_path, progress):
+    """
+    Removes all .pyc files.
+    
+    :param repo_root_path: 
+    :param progress: 
+    :return: 
+    """
+
+    if repo_root_path and os.path.exists(repo_root_path):
+        for root_path, dirs, files in os.walk(repo_root_path):
+            for _f in files:
+                if _f.endswith(".pyc"):
+                    full_path = os.path.join(root_path, _f)
+                    progress.update_output.emit("Removing file - '%s'" % full_path)
+                    try:
+                        os.remove(full_path)
+                    except IOError as e:
+                        progress.update_output.emit("Unable to remove file - '%s'" % full_path)
+                        progress.update_output.emit(str(e))
+
+
 def _update(app, repo, progress):
     project_id = app.context.project.get("id")
     # Get stored override config file name
@@ -80,6 +102,8 @@ def _update(app, repo, progress):
                 repo["branch"] = repo_config_data.get("branch") or repo["branch"]
                 repo["local_url"] = repo_config_data.get("local_url") or repo["local_url"]
                 repo["remote_url"] = repo_config_data.get("remote_url") or repo["remote_url"]
+
+    clean_repo_root_path(repo.get("local_url"), progress)
 
     clone_success = app.execute_hook('hook_clone', repo=repo, progress=progress)
     if not clone_success:

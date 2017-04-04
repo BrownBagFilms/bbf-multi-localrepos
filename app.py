@@ -8,11 +8,9 @@ class LocalRepos(Application):
 
         app_module = self.import_module('bbf_multi_localrepos')
 
-        # psutil does not work in maya
-        if self.engine.name in ["tk-maya"]:
-            self.psutil = None
-        else:
-            self.psutil = self.import_module('psutil')
+        psutil_loader = self.import_module("psutil_loader")
+
+        self.psutil = psutil_loader.get_psutil(self.engine.name)
 
         framework_sgutils = self.frameworks.get("tk-framework-shotgunutils")
         settings_module = framework_sgutils.import_module("settings")
