@@ -56,7 +56,7 @@ class RepoUpdateUi(QtGui.QMainWindow):
 
 def clean_repo_root_path(repo_root_path, progress):
     """
-    Removes all .pyc files.
+    Only removes .pyc files if a corresponding .py file does not exist
     
     :param repo_root_path: 
     :param progress: 
@@ -67,6 +67,11 @@ def clean_repo_root_path(repo_root_path, progress):
         for root_path, dirs, files in os.walk(repo_root_path):
             for _f in files:
                 if _f.endswith(".pyc"):
+                    py_file = _f.replace(".pyc", ".py")
+
+                    if os.path.exists(os.path.join(root_path, py_file)):
+                        continue
+
                     full_path = os.path.join(root_path, _f)
                     progress.update_output.emit("Removing file - '%s'" % full_path)
                     try:
